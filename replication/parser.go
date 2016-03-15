@@ -28,6 +28,14 @@ func NewBinlogParser() *BinlogParser {
 
 type OnEventFunc func(*BinlogEvent) error
 
+func (p *BinlogParser) GetTables() map[uint64]*TableMapEvent {
+	return p.tables
+}
+
+func (p *BinlogParser) SetTables(tables map[uint64]*TableMapEvent) {
+	p.tables = tables
+}
+
 func (p *BinlogParser) ParseFile(name string, offset int64, onEvent OnEventFunc) error {
 	f, err := os.Open(name)
 	if err != nil {

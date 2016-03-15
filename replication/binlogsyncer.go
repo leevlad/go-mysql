@@ -62,6 +62,10 @@ func NewBinlogSyncer(serverID uint32, flavor string) *BinlogSyncer {
 	return b
 }
 
+func (b *BinlogSyncer) GetParser() *BinlogParser {
+	return b.parser
+}
+
 func (b *BinlogSyncer) Close() {
 	b.m.Lock()
 	defer b.m.Unlock()
