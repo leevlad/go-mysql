@@ -8,9 +8,9 @@ import (
 
 	"github.com/BurntSushi/toml"
 	"github.com/juju/errors"
+	"github.com/ngaut/log"
 	"github.com/karmakaze/go-mysql/mysql"
 	"github.com/siddontang/go/ioutil2"
-	"github.com/siddontang/go/log"
 )
 
 type masterInfo struct {
@@ -31,9 +31,9 @@ func loadMasterInfo(name string) (*masterInfo, error) {
 	m.name = name
 
 	f, err := os.Open(name)
-	if err != nil && !os.IsNotExist(err) {
+	if err != nil && !os.IsNotExist(errors.Cause(err)) {
 		return nil, errors.Trace(err)
-	} else if os.IsNotExist(err) {
+	} else if os.IsNotExist(errors.Cause(err)) {
 		return &m, nil
 	}
 	defer f.Close()

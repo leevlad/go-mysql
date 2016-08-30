@@ -257,7 +257,13 @@ func (e *RowsEvent) Decode(data []byte) error {
 	var err error
 
 	// ... repeat rows until event-end
-	for pos < len(data) {
+	// Why using pos < len(data) - 1 instead of origin pos < len(data) to check?
+	// See mysql
+	//  https://github.com/mysql/mysql-server/blob/5.7/sql/log_event.cc#L9006
+	//	https://github.com/mysql/mysql-server/blob/5.7/sql/log_event.cc#L2492
+	// A user panics here but he can't give me more information, and using len(data) - 1
+	// fixes this panic, so I will try to construct a test case for this later.
+	for pos < len(data)-1 {
 		if n, err = e.decodeRows(data[pos:], e.Table, e.ColumnBitmap1); err != nil {
 			return errors.Trace(err)
 		}
@@ -430,10 +436,10 @@ func (e *RowsEvent) decodeValue(data []byte, tp byte, meta uint16) (v interface{
 			err = fmt.Errorf("Unknown ENUM packlen=%d", l)
 		}
 	case MYSQL_TYPE_SET:
-		nbits := meta & 0xFF
-		n = int(nbits+7) / 8
+		n = int(meta & 0xFF)
+		nbits := n * 8
 
-		v, err = decodeBit(data, int(nbits), n)
+		v, err = decodeBit(data, nbits, n)
 	case MYSQL_TYPE_BLOB:
 		switch meta {
 		case 1:

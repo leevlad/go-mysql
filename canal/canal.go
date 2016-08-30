@@ -11,12 +11,12 @@ import (
 	"sync"
 
 	"github.com/juju/errors"
+	"github.com/ngaut/log"
 	"github.com/karmakaze/go-mysql/client"
 	"github.com/karmakaze/go-mysql/dump"
 	"github.com/karmakaze/go-mysql/mysql"
 	"github.com/karmakaze/go-mysql/replication"
 	"github.com/karmakaze/go-mysql/schema"
-	"github.com/siddontang/go/log"
 	"github.com/siddontang/go/sync2"
 )
 
@@ -89,13 +89,18 @@ func NewCanal(cfg *Config) (*Canal, error) {
 
 func (c *Canal) prepareDumper() error {
 	var err error
-	if c.dumper, err = dump.NewDumper(c.cfg.Dump.ExecutionPath,
+	dumpPath := c.cfg.Dump.ExecutionPath
+	if len(dumpPath) == 0 {
+		// ignore mysqldump, use binlog only
+		return nil
+	}
+
+	if c.dumper, err = dump.NewDumper(dumpPath,
 		c.cfg.Addr, c.cfg.User, c.cfg.Password); err != nil {
 		if err != exec.ErrNotFound {
 			return errors.Trace(err)
 		}
 		//no mysqldump, use binlog only
-		c.dumper = nil
 		return nil
 	}
 
@@ -278,9 +283,9 @@ func (c *Canal) Execute(cmd string, args ...interface{}) (rr *mysql.Result, err 
 		}
 
 		rr, err = c.conn.Execute(cmd, args...)
-		if err != nil && err != mysql.ErrBadConn {
+		if err != nil && !mysql.ErrorEqual(err, mysql.ErrBadConn) {
 			return
-		} else if err == mysql.ErrBadConn {
+		} else if mysql.ErrorEqual(err, mysql.ErrBadConn) {
 			c.conn.Close()
 			c.conn = nil
 			continue

@@ -11,8 +11,8 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/juju/errors"
+	. "github.com/pingcap/check"
 	mysql "github.com/karmakaze/go-mysql/mysql"
-	. "gopkg.in/check.v1"
 )
 
 var testAddr = flag.String("addr", "127.0.0.1:4000", "MySQL proxy server address")
@@ -106,6 +106,10 @@ func (h *testHandler) HandleStmtPrepare(sql string) (params int, columns int, ct
 		err = fmt.Errorf("invalid prepare %s", sql)
 	}
 	return params, columns, nil, err
+}
+
+func (h *testHandler) HandleStmtClose(context interface{}) error {
+	return nil
 }
 
 func (h *testHandler) HandleStmtExecute(ctx interface{}, query string, args []interface{}) (*mysql.Result, error) {
