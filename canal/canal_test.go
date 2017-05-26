@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/siddontang/go-mysql/mysql"
+	"github.com/leevlad/go-mysql/mysql"
 	"github.com/siddontang/go/log"
 	. "gopkg.in/check.v1"
 )

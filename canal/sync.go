@@ -4,8 +4,8 @@ import (
 	"time"
 
 	"github.com/juju/errors"
-	"github.com/siddontang/go-mysql/mysql"
-	"github.com/siddontang/go-mysql/replication"
+	"github.com/leevlad/go-mysql/mysql"
+	"github.com/leevlad/go-mysql/replication"
 	"github.com/siddontang/go/log"
 )
 
